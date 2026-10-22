@@ -1,0 +1,522 @@
+
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FORGE Fitness</title>
+<style>
+:root{--bg:#090b09;--panel:#131613;--panel2:#1b1f1b;--line:#292e29;--green:#c1ff4b;--text:#f2f4ef;--muted:#939b91;--red:#ff7777}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif;font-size:14px}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.app{max-width:1250px;margin:auto;padding:24px}
+header{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:10px 0 25px}
+.logo{font-size:23px;font-weight:900;letter-spacing:2px}.logo span{color:var(--green)}
+.tag{color:var(--muted);font-size:12px;margin-top:5px}
+.pill{border:1px solid var(--line);border-radius:30px;padding:9px 12px;color:var(--green);font-size:12px}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px}
+nav button,.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:11px 15px}
+nav button.active,.btn.primary{background:var(--green);color:#11150b;border-color:var(--green);font-weight:800}
+.btn.danger{color:var(--red)}
+button:hover{filter:brightness(1.12)}
+h1{font-size:29px;margin:0 0 8px;letter-spacing:-.8px}
+h2{font-size:17px;margin:0 0 16px}
+h3{font-size:14px;margin:0 0 9px}
+p{line-height:1.6;color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.page{display:none}.page.active{display:block}
+.grid{display:grid;gap:15px}
+.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin:24px 0}
+.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:20px;min-width:0}
+.stat-label{color:var(--muted);font-size:12px;margin-bottom:12px}
+.stat-value{font-size:26px;font-weight:800;letter-spacing:-1px}
+.stat-unit{font-size:12px;color:var(--muted);font-weight:400}
+.green{color:var(--green)}
+.bar{height:6px;border-radius:8px;background:#2a3028;overflow:hidden;margin-top:13px}
+.bar span{display:block;height:100%;background:var(--green);border-radius:8px;transition:width .2s}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 14px}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.field label{font-size:12px;color:var(--muted)}
+input,select{width:100%;background:#0b0e0b;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:11px;min-width:0}
+input[type=file]{font-size:12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.food,.exercise,.history-row{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid var(--line)}
+.food:last-child,.exercise:last-child,.history-row:last-child{border-bottom:0}
+.thumb{width:62px;height:62px;object-fit:cover;border-radius:9px;background:var(--panel2);flex-shrink:0}
+.food-main,.exercise-main{flex:1;min-width:0}
+.food-main strong,.exercise-main strong{display:block;margin-bottom:5px}
+.food-main p,.exercise-main p{font-size:12px;margin:0}
+.icon-btn{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:7px;padding:7px 9px}
+.check{width:19px;height:19px;accent-color:var(--green);flex-shrink:0}
+.day-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.day-tabs button{flex:1;min-width:75px}
+.day-tabs button.active{border-color:var(--green);color:var(--green)}
+.big-number{font-size:38px;font-weight:900;letter-spacing:-2px}
+.empty{padding:25px 0;color:var(--muted);text-align:center}
+.notice{padding:12px 14px;border-radius:9px;background:#20291a;color:#d9f8a7;font-size:12px;line-height:1.6;margin:12px 0}
+footer{padding:30px 0 12px;text-align:center;color:var(--muted);font-size:11px}
+canvas{width:100%;height:190px;display:block}
+label.inline{display:flex;align-items:center;gap:8px}
+@media(max-width:760px){.app{padding:15px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}h1{font-size:25px}.card{padding:16px}nav button{flex:1}.stat-value{font-size:23px}}
+@media(max-width:390px){.formgrid{grid-template-columns:1fr}.pill{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div>
+    <div class="logo">FORGE<span>.</span> FITNESS</div>
+    <div class="tag">DISCIPLINA. PROGRESSO. CONSISTÊNCIA.</div>
+  </div>
+  <div class="pill">● OFFLINE READY</div>
+</header>
+
+<nav aria-label="Navegação principal">
+  <button class="active" data-page="dashboard">Painel</button>
+  <button data-page="diario">Alimentação</button>
+  <button data-page="treino">Treino</button>
+  <button data-page="progresso">Progresso</button>
+  <button data-page="definicoes">Definições</button>
+</nav>
+
+<main>
+<section id="dashboard" class="page active">
+  <p class="green small">O TEU RESUMO DIÁRIO</p>
+  <h1>Constrói a tua melhor versão.</h1>
+  <p>Acompanha a alimentação, cumpre o plano e evolui todos os dias.</p>
+  <div class="field" style="max-width:220px;margin-top:18px">
+    <label for="selectedDate">Dia em análise</label>
+    <input id="selectedDate" type="date">
+  </div>
+  <div class="grid stats">
+    <div class="card">
+      <div class="stat-label">CALORIAS</div>
+      <div class="stat-value"><span id="kcal">0</span><span class="stat-unit"> kcal</span></div>
+      <div class="bar"><span id="kcalBar"></span></div>
+      <p class="small"><span id="kcalRemaining">2500</span> kcal restantes</p>
+    </div>
+    <div class="card">
+      <div class="stat-label">PROTEÍNA</div>
+      <div class="stat-value"><span id="protein">0</span><span class="stat-unit"> g</span></div>
+      <div class="bar"><span id="proteinBar"></span></div>
+      <p class="small">Objetivo: <span id="proteinGoal">150</span> g</p>
+    </div>
+    <div class="card">
+      <div class="stat-label">HIDRATOS</div>
+      <div class="stat-value"><span id="carbs">0</span><span class="stat-unit"> g</span></div>
+      <div class="bar"><span id="carbsBar"></span></div>
+      <p class="small">Objetivo: <span id="carbsGoal">300</span> g</p>
+    </div>
+    <div class="card">
+      <div class="stat-label">GORDURAS</div>
+      <div class="stat-value"><span id="fat">0</span><span class="stat-unit"> g</span></div>
+      <div class="bar"><span id="fatBar"></span></div>
+      <p class="small">Objetivo: <span id="fatGoal">80</span> g</p>
+    </div>
+  </div>
+  <div class="grid two">
+    <div class="card">
+      <div class="section-head" style="margin-top:0"><h2>Alimentação de hoje</h2><button class="btn" data-go="diario">+ Registar</button></div>
+      <div id="dashboardFoods"></div>
+    </div>
+    <div class="card">
+      <div class="section-head" style="margin-top:0"><h2>Treino de hoje</h2><button class="btn" data-go="treino">Ver plano</button></div>
+      <div id="dashboardWorkout"></div>
+      <div class="notice">A consistência vence a perfeição. Regista o que fazes e acompanha a tua evolução.</div>
+    </div>
+  </div>
+</section>
+
+<section id="diario" class="page">
+  <p class="green small">NUTRIÇÃO</p>
+  <h1>Diário alimentar</h1>
+  <p>Regista o que comes, junta fotografias e acompanha os teus macros.</p>
+  <div class="grid two" style="margin-top:22px">
+    <div class="card">
+      <h2>Adicionar refeição</h2>
+      <form id="foodForm">
+        <div class="field"><label for="foodName">Alimento ou refeição</label><input id="foodName" required maxlength="100" placeholder="Ex.: Arroz, frango e legumes"></div>
+        <div class="formgrid">
+          <div class="field"><label for="mealType">Refeição</label><select id="mealType"><option>Pequeno-almoço</option><option>Almoço</option><option>Lanche</option><option>Jantar</option><option>Ceia</option></select></div>
+          <div class="field"><label for="foodDate">Data</label><input id="foodDate" type="date" required></div>
+          <div class="field"><label for="foodGrams">Quantidade (g)</label><input id="foodGrams" type="number" min="0" step="1" placeholder="250"></div>
+          <div class="field"><label for="foodKcal">Calorias (kcal)</label><input id="foodKcal" type="number" min="0" step="1" required placeholder="550"></div>
+          <div class="field"><label for="foodProtein">Proteína (g)</label><input id="foodProtein" type="number" min="0" step="0.1" required placeholder="35"></div>
+          <div class="field"><label for="foodCarbs">Hidratos (g)</label><input id="foodCarbs" type="number" min="0" step="0.1" required placeholder="65"></div>
+          <div class="field"><label for="foodFat">Gorduras (g)</label><input id="foodFat" type="number" min="0" step="0.1" required placeholder="15"></div>
+          <div class="field"><label for="foodPhoto">Fotografia (opcional)</label><input id="foodPhoto" type="file" accept="image/*"></div>
+        </div>
+        <div class="notice">As fotografias são guardadas no teu browser. Introduz valores nutricionais de um rótulo, de uma aplicação de referência ou da tua própria estimativa.</div>
+        <button class="btn primary" type="submit">Guardar refeição</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Resumo nutricional</h2>
+      <div class="big-number green" id="diaryKcal">0 <span class="stat-unit">kcal</span></div>
+      <p>Consumidas no dia selecionado.</p>
+      <div id="diaryMacros"></div>
+      <div class="section-head"><h2>Registos do dia</h2><span class="muted small" id="foodCount">0 refeições</span></div>
+      <div id="foodList"></div>
+    </div>
+  </div>
+</section>
+
+<section id="treino" class="page">
+  <p class="green small">TREINO DE FORÇA E HIPERTROFIA</p>
+  <h1>Plano de treino</h1>
+  <p>Plano base de cinco dias. Ajusta cargas e exercícios às tuas capacidades.</p>
+  <div class="day-tabs" id="dayTabs"></div>
+  <div class="card">
+    <div class="section-head" style="margin-top:0"><div><p class="green small" id="workoutLabel"></p><h2 id="workoutTitle"></h2></div><span class="pill" id="workoutCount">0/0 concluídos</span></div>
+    <p id="workoutDesc"></p>
+    <div id="exerciseList"></div>
+    <div class="actions" style="margin-top:20px"><button class="btn primary" id="finishWorkout">Concluir treino do dia</button><button class="btn" id="resetWorkout">Repor exercícios</button></div>
+    <p class="small">Registos de conclusão guardados por data. Descansa entre séries e usa uma carga com técnica controlada.</p>
+  </div>
+</section>
+
+<section id="progresso" class="page">
+  <p class="green small">ACOMPANHAMENTO</p>
+  <h1>O teu progresso</h1>
+  <p>O peso é uma tendência: compara medições feitas em condições semelhantes.</p>
+  <div class="grid two" style="margin-top:22px">
+    <div class="card">
+      <h2>Registar peso</h2>
+      <form id="weightForm">
+        <div class="field"><label for="weightDate">Data</label><input id="weightDate" type="date" required></div>
+        <div class="field"><label for="weightValue">Peso (kg)</label><input id="weightValue" type="number" min="20" max="400" step="0.1" required placeholder="74.0"></div>
+        <button class="btn primary">Guardar peso</button>
+      </form>
+      <div class="section-head"><h2>Última medição</h2></div>
+      <div class="big-number green" id="latestWeight">— <span class="stat-unit">kg</span></div>
+      <p id="weightChange">Adiciona a tua primeira medição.</p>
+    </div>
+    <div class="card">
+      <h2>Evolução do peso</h2>
+      <canvas id="weightChart" aria-label="Gráfico do peso ao longo do tempo"></canvas>
+      <p class="small">Gráfico baseado nos teus registos guardados.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:15px">
+    <h2>Histórico de peso</h2>
+    <div id="weightList"></div>
+  </div>
+</section>
+
+<section id="definicoes" class="page">
+  <p class="green small">PERSONALIZAÇÃO</p>
+  <h1>Definições</h1>
+  <p>Adapta os objetivos ao teu plano de alimentação e treino.</p>
+  <div class="grid two" style="margin-top:22px">
+    <div class="card">
+      <h2>Objetivos diários</h2>
+      <form id="goalsForm">
+        <div class="field"><label for="goalKcal">Calorias (kcal)</label><input id="goalKcal" type="number" min="500" max="10000" required></div>
+        <div class="field"><label for="goalProtein">Proteína (g)</label><input id="goalProtein" type="number" min="0" max="1000" required></div>
+        <div class="field"><label for="goalCarbs">Hidratos de carbono (g)</label><input id="goalCarbs" type="number" min="0" max="1500" required></div>
+        <div class="field"><label for="goalFat">Gorduras (g)</label><input id="goalFat" type="number" min="0" max="500" required></div>
+        <button class="btn primary">Guardar objetivos</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Os teus dados</h2>
+      <p>Os registos são armazenados localmente neste browser e neste dispositivo. Não existe uma conta online nem sincronização automática.</p>
+      <div class="actions">
+        <button class="btn primary" id="exportData">Exportar dados JSON</button>
+        <button class="btn" id="importButton">Importar cópia</button>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+      <p class="small">Exporta regularmente uma cópia de segurança, sobretudo se registares fotografias.</p>
+      <div class="notice">A limpeza dos dados do browser pode apagar os teus registos. Guarda uma cópia antes de mudares de dispositivo ou browser.</div>
+      <button class="btn danger" id="clearData">Apagar todos os dados</button>
+    </div>
+  </div>
+</section>
+</main>
+<footer>FORGE FITNESS · O TEU ESFORÇO, OS TEUS REGISTOS · VERSÃO LOCAL</footer>
+</div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+const today = () => new Date().toLocaleDateString("en-CA");
+const KEY = "forgeFitnessLocalV1";
+
+const defaultState = () => ({
+  goals:{kcal:2500,protein:150,carbs:300,fat:80},
+  foods:[],weights:[],completed:{}
+});
+
+let state;
+try {
+  state = {...defaultState(), ...JSON.parse(localStorage.getItem(KEY) || "{}")};
+  state.goals = {...defaultState().goals, ...(state.goals || {})};
+  if(!Array.isArray(state.foods)) state.foods=[];
+  if(!Array.isArray(state.weights)) state.weights=[];
+  if(!state.completed || typeof state.completed!=="object") state.completed={};
+} catch(e) {
+  state=defaultState();
+}
+
+let selectedDay=today();
+let selectedWorkout=0;
+
+const workouts=[
+ {name:"Peito + Tríceps",desc:"Empurrar · controlo técnico e progressão de carga",exercises:[
+  ["Supino com halteres",4,"8–10"],["Supino inclinado",3,"8–12"],["Aberturas na polia",3,"12–15"],["Elevações laterais",3,"12–15"],["Extensão de tríceps na polia",3,"10–15"]]},
+ {name:"Costas + Bíceps",desc:"Puxar · amplitude completa e postura controlada",exercises:[
+  ["Puxada na polia",4,"8–12"],["Remada sentada",3,"8–12"],["Remada unilateral",3,"10–12"],["Face pull",3,"12–15"],["Curl de bíceps com halteres",3,"10–12"]]},
+ {name:"Pernas + Abdominais",desc:"Trabalho de pernas com técnica e amplitude adequadas",exercises:[
+  ["Agachamento ou leg press",4,"8–12"],["Peso morto romeno",3,"8–10"],["Cadeira extensora",3,"10–15"],["Curl de pernas",3,"10–15"],["Elevação de gémeos",4,"12–15"],["Prancha",3,"30–60 s"]]},
+ {name:"Ombros + Braços",desc:"Volume moderado, sem comprometer a recuperação",exercises:[
+  ["Press de ombros",3,"8–12"],["Elevações laterais",4,"12–15"],["Reverse fly",3,"12–15"],["Curl inclinado",3,"10–12"],["Extensão de tríceps",3,"10–15"]]},
+ {name:"Tronco completo",desc:"Reforço equilibrado · carga moderada e boa execução",exercises:[
+  ["Supino na máquina",3,"10–12"],["Remada apoiada",3,"10–12"],["Puxada na polia",3,"10–12"],["Press de pernas",3,"10–12"],["Elevações laterais",3,"12–15"],["Abdominais na polia",3,"12–15"]]}
+];
+
+function save(){
+  try {
+    localStorage.setItem(KEY,JSON.stringify(state));
+    return true;
+  } catch(e) {
+    alert("Não foi possível guardar. O armazenamento pode estar cheio, especialmente devido às fotografias. Exporta os dados e tenta remover fotografias grandes.");
+    return false;
+  }
+}
+function esc(value){
+  return String(value ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function num(value){return Number(value)||0}
+function fmt(value){return num(value).toLocaleString("pt-PT",{maximumFractionDigits:1})}
+function sumFoods(date){
+  return state.foods.filter(f=>f.date===date).reduce((s,f)=>{
+    s.kcal+=num(f.kcal);s.protein+=num(f.protein);s.carbs+=num(f.carbs);s.fat+=num(f.fat);return s;
+  },{kcal:0,protein:0,carbs:0,fat:0});
+}
+function bar(id,value,goal){
+  $(id).style.width=Math.min(100,goal>0?value/goal*100:0)+"%";
+}
+function setPage(page){
+  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===page));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+  if(page==="progresso") renderWeights();
+  if(page==="treino") renderWorkout();
+  if(page==="diario") renderFoods();
+}
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>setPage(b.dataset.page)));
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>setPage(b.dataset.go)));
+
+$("selectedDate").value=selectedDay;
+$("foodDate").value=selectedDay;
+$("weightDate").value=selectedDay;
+$("selectedDate").addEventListener("change",()=>{
+  selectedDay=$("selectedDate").value||today();
+  $("foodDate").value=selectedDay;
+  renderAll();
+});
+$("foodDate").addEventListener("change",()=>{});
+$("foodForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const file=$("foodPhoto").files[0];
+  let photo="";
+  if(file){
+    if(!file.type.startsWith("image/")){alert("Escolhe um ficheiro de imagem válido.");return;}
+    if(file.size>12*1024*1024){alert("A fotografia original deve ter menos de 12 MB.");return;}
+    try{photo=await compressImage(file);}catch(err){alert("Não foi possível processar a fotografia.");return;}
+  }
+  const food={
+    id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),
+    name:$("foodName").value.trim(),meal:$("mealType").value,
+    date:$("foodDate").value||selectedDay,grams:num($("foodGrams").value),
+    kcal:num($("foodKcal").value),protein:num($("foodProtein").value),
+    carbs:num($("foodCarbs").value),fat:num($("foodFat").value),photo
+  };
+  if(!food.name){alert("Indica o nome do alimento.");return;}
+  state.foods.push(food);
+  if(!save()){state.foods.pop();return;}
+  e.target.reset();
+  $("foodDate").value=selectedDay;
+  renderAll();
+  alert("Refeição guardada.");
+});
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=reject;
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=reject;
+      img.onload=()=>{
+        const max=700,scale=Math.min(1,max/Math.max(img.width,img.height));
+        const canvas=document.createElement("canvas");
+        canvas.width=Math.max(1,Math.round(img.width*scale));
+        canvas.height=Math.max(1,Math.round(img.height*scale));
+        canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL("image/jpeg",0.68));
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function renderDashboard(){
+  const s=sumFoods(selectedDay),g=state.goals;
+  $("kcal").textContent=fmt(s.kcal);
+  $("protein").textContent=fmt(s.protein);
+  $("carbs").textContent=fmt(s.carbs);
+  $("fat").textContent=fmt(s.fat);
+  $("kcalRemaining").textContent=fmt(Math.max(0,g.kcal-s.kcal));
+  $("proteinGoal").textContent=fmt(g.protein);
+  $("carbsGoal").textContent=fmt(g.carbs);
+  $("fatGoal").textContent=fmt(g.fat);
+  bar("kcalBar",s.kcal,g.kcal);bar("proteinBar",s.protein,g.protein);
+  bar("carbsBar",s.carbs,g.carbs);bar("fatBar",s.fat,g.fat);
+  const foods=state.foods.filter(f=>f.date===selectedDay);
+  $("dashboardFoods").innerHTML=foods.length?foods.slice().reverse().slice(0,4).map(f=>`
+    <div class="food">
+      ${f.photo?`<img class="thumb" src="${f.photo}" alt="Fotografia de ${esc(f.name)}">`:`<div class="thumb" style="display:grid;place-items:center">🍽</div>`}
+      <div class="food-main"><strong>${esc(f.name)}</strong><p>${esc(f.meal)} · ${fmt(f.kcal)} kcal</p></div>
+    </div>`).join(""):`<div class="empty">Ainda não registaste refeições neste dia.</div>`;
+  const idx=(new Date(selectedDay+"T12:00:00").getDay()+6)%7;
+  const wi=idx>=0&&idx<5?idx:-1;
+  const done=wi>=0?(state.completed[selectedDay+"-"+wi]||[]).length:0;
+  $("dashboardWorkout").innerHTML=wi<0
+   ?`<h3>Dia de descanso</h3><p>Recuperar também faz parte do progresso.</p>`
+   :`<p class="green small">DIA ${wi+1}</p><h3>${esc(workouts[wi].name)}</h3><p>${done} de ${workouts[wi].exercises.length} exercícios concluídos.</p><div class="bar"><span style="width:${done/workouts[wi].exercises.length*100}%"></span></div>`;
+}
+function renderFoods(){
+  const foods=state.foods.filter(f=>f.date===selectedDay);
+  const s=sumFoods(selectedDay);
+  $("diaryKcal").innerHTML=`${fmt(s.kcal)} <span class="stat-unit">kcal</span>`;
+  $("diaryMacros").innerHTML=[
+    ["Proteína",s.protein,state.goals.protein],["Hidratos",s.carbs,state.goals.carbs],["Gorduras",s.fat,state.goals.fat]
+  ].map(([label,val,goal])=>`<div style="margin:18px 0"><div class="actions" style="justify-content:space-between"><span>${label}</span><span>${fmt(val)} / ${fmt(goal)} g</span></div><div class="bar"><span style="width:${Math.min(100,goal?val/goal*100:0)}%"></span></div></div>`).join("");
+  $("foodCount").textContent=foods.length+" registos";
+  $("foodList").innerHTML=foods.length?foods.slice().reverse().map(f=>`
+    <div class="food">
+      ${f.photo?`<img class="thumb" src="${f.photo}" alt="Fotografia de ${esc(f.name)}">`:`<div class="thumb" style="display:grid;place-items:center">🍽</div>`}
+      <div class="food-main"><strong>${esc(f.name)}</strong><p>${esc(f.meal)} · ${fmt(f.grams)} g</p><p>${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · HC ${fmt(f.carbs)} g · G ${fmt(f.fat)} g</p></div>
+      <button class="icon-btn" data-delete-food="${esc(f.id)}" aria-label="Apagar ${esc(f.name)}">Apagar</button>
+    </div>`).join(""):`<div class="empty">Sem refeições registadas para esta data.</div>`;
+  document.querySelectorAll("[data-delete-food]").forEach(b=>b.addEventListener("click",()=>{
+    if(!confirm("Apagar este registo alimentar?"))return;
+    state.foods=state.foods.filter(f=>f.id!==b.dataset.deleteFood);
+    save();renderAll();
+  }));
+}
+function renderWorkout(){
+  $("dayTabs").innerHTML=workouts.map((w,i)=>`<button class="btn ${selectedWorkout===i?"active":""}" data-day="${i}">DIA ${i+1}</button>`).join("");
+  document.querySelectorAll("[data-day]").forEach(b=>b.addEventListener("click",()=>{
+    selectedWorkout=Number(b.dataset.day);renderWorkout();
+  }));
+  const w=workouts[selectedWorkout],key=selectedDay+"-"+selectedWorkout;
+  const done=state.completed[key]||[];
+  $("workoutLabel").textContent="DIA "+(selectedWorkout+1)+" / 5";
+  $("workoutTitle").textContent=w.name;
+  $("workoutDesc").textContent=w.desc;
+  $("workoutCount").textContent=done.length+"/"+w.exercises.length+" concluídos";
+  $("exerciseList").innerHTML=w.exercises.map((ex,i)=>`
+    <div class="exercise">
+      <input class="check" type="checkbox" data-exercise="${i}" ${done.includes(i)?"checked":""} aria-label="Concluir ${esc(ex[0])}">
+      <div class="exercise-main"><strong>${esc(ex[0])}</strong><p>${ex[1]} séries · ${esc(ex[2])} repetições</p></div>
+      <span class="small ${done.includes(i)?"green":"muted"}">${done.includes(i)?"Feito":"Pendente"}</span>
+    </div>`).join("");
+  document.querySelectorAll("[data-exercise]").forEach(c=>c.addEventListener("change",()=>{
+    let arr=state.completed[key]||[];
+    const i=Number(c.dataset.exercise);
+    arr=c.checked?[...new Set([...arr,i])]:arr.filter(x=>x!==i);
+    state.completed[key]=arr;save();renderWorkout();renderDashboard();
+  }));
+}
+$("finishWorkout").addEventListener("click",()=>{
+  const key=selectedDay+"-"+selectedWorkout;
+  state.completed[key]=workouts[selectedWorkout].exercises.map((_,i)=>i);
+  save();renderWorkout();renderDashboard();
+  alert("Treino marcado como concluído.");
+});
+$("resetWorkout").addEventListener("click",()=>{
+  if(!confirm("Repor as caixas deste treino?"))return;
+  delete state.completed[selectedDay+"-"+selectedWorkout];save();renderWorkout();renderDashboard();
+});
+$("weightForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const entry={date:$("weightDate").value||today(),kg:num($("weightValue").value)};
+  state.weights=state.weights.filter(w=>w.date!==entry.date);
+  state.weights.push(entry);state.weights.sort((a,b)=>a.date.localeCompare(b.date));
+  if(save()){renderWeights();alert("Peso guardado.");}
+});
+function renderWeights(){
+  const list=state.weights.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const last=list[list.length-1];
+  $("latestWeight").innerHTML=last?`${fmt(last.kg)} <span class="stat-unit">kg</span>`:`— <span class="stat-unit">kg</span>`;
+  $("weightChange").textContent=list.length>1?`Variação desde o primeiro registo: ${fmt(last.kg-list[0].kg)} kg.`:"Regista medições ao longo do tempo para acompanhar a tendência.";
+  $("weightList").innerHTML=list.length?list.slice().reverse().map(w=>`
+    <div class="history-row"><div style="flex:1"><strong>${esc(w.date)}</strong></div><strong>${fmt(w.kg)} kg</strong><button class="icon-btn" data-delete-weight="${esc(w.date)}">Apagar</button></div>`).join(""):`<div class="empty">Ainda não existem medições.</div>`;
+  document.querySelectorAll("[data-delete-weight]").forEach(b=>b.addEventListener("click",()=>{
+    state.weights=state.weights.filter(w=>w.date!==b.dataset.deleteWeight);save();renderWeights();
+  }));
+  drawChart(list);
+}
+function drawChart(list){
+  const canvas=$("weightChart"),ctx=canvas.getContext("2d");
+  const width=canvas.clientWidth||320,height=190,dpr=window.devicePixelRatio||1;
+  canvas.width=width*dpr;canvas.height=height*dpr;
+  ctx.scale(dpr,dpr);ctx.clearRect(0,0,width,height);
+  if(!list.length){ctx.fillStyle="#939b91";ctx.font="12px Arial";ctx.fillText("Regista o teu peso para ver o gráfico.",10,35);return;}
+  const vals=list.map(x=>x.kg),min=Math.min(...vals)-1,max=Math.max(...vals)+1;
+  const pad={l:30,r:12,t:20,b:28},cw=width-pad.l-pad.r,ch=height-pad.t-pad.b;
+  ctx.strokeStyle="#292e29";ctx.fillStyle="#939b91";ctx.font="10px Arial";
+  for(let i=0;i<4;i++){const y=pad.t+ch*i/3;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(width-pad.r,y);ctx.stroke();ctx.fillText((max-(max-min)*i/3).toFixed(1),0,y+3);}
+  const points=list.map((v,i)=>({x:pad.l+(list.length===1?cw/2:cw*i/(list.length-1)),y:pad.t+ch*(max-v.kg)/(max-min)}));
+  ctx.strokeStyle="#c1ff4b";ctx.lineWidth=2;ctx.beginPath();
+  points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
+  ctx.fillStyle="#c1ff4b";points.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,3.5,0,Math.PI*2);ctx.fill();});
+  ctx.fillStyle="#939b91";ctx.fillText(list[0].date.slice(5),pad.l,height-7);
+  if(list.length>1)ctx.fillText(list[list.length-1].date.slice(5),Math.max(pad.l,width-48),height-7);
+}
+window.addEventListener("resize",()=>{if($("progresso").classList.contains("active"))drawChart(state.weights.slice().sort((a,b)=>a.date.localeCompare(b.date)));});
+$("goalsForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  state.goals={kcal:num($("goalKcal").value),protein:num($("goalProtein").value),carbs:num($("goalCarbs").value),fat:num($("goalFat").value)};
+  if(save()){renderAll();alert("Objetivos atualizados.");}
+});
+function fillGoals(){
+  $("goalKcal").value=state.goals.kcal;$("goalProtein").value=state.goals.protein;
+  $("goalCarbs").value=state.goals.carbs;$("goalFat").value=state.goals.fat;
+}
+$("exportData").addEventListener("click",()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="forge-fitness-backup-"+today()+".json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+$("importButton").addEventListener("click",()=>$("importFile").click());
+$("importFile").addEventListener("change",async e=>{
+  const file=e.target.files[0];if(!file)return;
+  try{
+    const incoming=JSON.parse(await file.text());
+    if(!incoming||!Array.isArray(incoming.foods)||!Array.isArray(incoming.weights)||!incoming.goals||typeof incoming.goals!=="object"||!incoming.completed||typeof incoming.completed!=="object")throw Error("invalid");
+    if(!confirm("Importar esta cópia e substituir os dados atuais? Exporta primeiro uma cópia dos dados atuais."))return;
+    state={...defaultState(),...incoming,goals:{...defaultState().goals,...incoming.goals}};
+    if(save()) {fillGoals();renderAll();alert("Cópia importada.");}
+  }catch(err){alert("O ficheiro não parece ser uma cópia válida da FORGE Fitness.");}
+  finally{e.target.value="";}
+});
+$("clearData").addEventListener("click",()=>{
+  if(!confirm("Queres apagar permanentemente os registos guardados neste browser? Exporta uma cópia antes de continuar."))return;
+  if(!confirm("Confirma novamente: apagar todas as refeições, fotografias, pesos e treinos?"))return;
+  state=defaultState();save();fillGoals();renderAll();alert("Os dados locais foram apagados.");
+});
+function renderAll(){renderDashboard();renderFoods();renderWorkout();renderWeights();fillGoals();}
+fillGoals();
+renderAll();
+</script>
+</body>
+</html>
